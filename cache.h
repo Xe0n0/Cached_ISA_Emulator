@@ -1,13 +1,6 @@
 #pragma once
 
-struct Cache
-{
-	uint32_t n_ways;
-	uint32_t blk_size;
-	uint32_t n_sets;
-
-};
-
+struct Cache;
 struct Ret
 {
 	uint32_t set;
