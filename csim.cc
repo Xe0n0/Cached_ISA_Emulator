@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -44,13 +45,17 @@ read_trace(char const* path)
 {
   ifstream ifs;
   ifs.open(path);
-  ifs >> hex;
 
   vector<pair<uint64_t, uint32_t>> trace;
-  uint64_t addr;
-  uint32_t len;
-  while (ifs >> addr >> len)
-    trace.push_back(make_pair(addr, len));
+  string line;
+  while (getline(ifs, line))
+    {
+      istringstream iss(line);
+      uint64_t addr;
+      uint32_t len;
+      iss >> hex >> addr >> len;
+      trace.push_back(make_pair(addr, len));
+    }
 
   return trace;
 }
@@ -77,7 +82,8 @@ int main(int argc, char *argv[])
       uint64_t first_block = addr & block_mask;
       uint64_t last_block = (addr + len - 1) & block_mask;
 
-      for (uint64_t a = first_block; a <= last_block; a++)
+      for (uint64_t a = first_block; a <= last_block;
+           a += block_mask ^ (block_mask << 1))
         btrace.push_back(a);
     }
 
