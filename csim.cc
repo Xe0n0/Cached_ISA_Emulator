@@ -72,7 +72,13 @@ int main(int argc, char *argv[])
           if (ret == 0)
             cout << "hit\n";
           else
-            cout << "miss\n";
+            {
+              cout << "miss ";
+              cout << "(" << replacement.set_index
+                   << ", " << replacement.line_index << ")"
+                   << " (originally "
+                   << replacement.addr_old << ") replaced\n";
+            }
         }
     }
 
