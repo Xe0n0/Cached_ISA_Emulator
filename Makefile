@@ -2,7 +2,7 @@ CC=clang
 CXX=clang++
 CPPFLAGS=-I.
 CFLAGS=-g -Wall -std=c11
-CXXFLAGS=-g -Wall -std=c++11
+CXXFLAGS=-g -Wall -std=c++11 -stdlib=libc++
 
 csim: csim.o cache.o cache_replace.o
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
