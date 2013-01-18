@@ -92,14 +92,19 @@ int main(int argc, char *argv[])
       int ret = cache_access(c, a, &replacement);
       cout << a << " ";
       if (ret == 0)
-        cout << "hit\n";
+        cout << "hit (" << replacement.set_index << ", "
+             << replacement.line_index << ")\n";
       else
         {
           cout << "miss ";
           cout << "(" << replacement.set_index
-               << ", " << replacement.line_index << ")"
-               << " (originally "
-               << replacement.addr_old << ") replaced\n";
+               << ", " << replacement.line_index << ")";
+          if (replacement.type == RetTypeCompulsoryMiss)
+            cout << " filled\n";
+          else if (replacement.type == RetTypeReplacedMiss)
+            cout << " replaced (originally " << replacement.addr_old << ")\n";
+          else
+            cout << "???" << replacement.type << "\n";
         }
     }
 
