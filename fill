@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+
+from __future__ import division
+from __future__ import print_function
+
+import re
+import sys
+
+interval = -1
+
+try:
+    interval = int(sys.argv[1])
+except:
+    pass
+
+total = 0
+fill = 0
+i = 0
+
+for l in sys.stdin:
+    if re.match('.*fill.*', l):
+        fill = fill + 1
+    total = total + 1
+    if interval > 0 and total % interval == 0:
+        print(i, fill)
+        i = i + interval
+
+if interval < 0:
+    print(fill)
+elif total % interval != 0:
+    print(i, fill)
