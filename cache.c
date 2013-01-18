@@ -70,7 +70,7 @@ cache_access(struct Cache* cache, uint64_t addr, Ret* ret)
 	tag = addr >> log2_index;
 	set_index = (addr << log2_tag) >> (log2_tag + cache->log2_blksize);
 	// printf("0x%llx, 0x%llx\n", cache->log2_blksize, cache->log2_n_sets);
-	set = cache->cache_buf + set_index * cache->n_ways * sizeof(blk_t);
+	set = cache->cache_buf + set_index * cache->n_ways;
 
 	// printf("access :0x%llx, 0x%llx, 0x%llx\n", addr, tag, set_index);
 
