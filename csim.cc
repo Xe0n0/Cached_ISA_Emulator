@@ -1,13 +1,15 @@
 #include <stdint.h>
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <tuple>
 #include <vector>
 
 #include <cache.h>
 
 using namespace std;
 
-static pair<Cache*, uint64_t>
+static tuple<Cache*, uint64_t, ReplaceMode>
 read_cache_structure(char const* path)
 {
   ifstream ifs;
@@ -15,13 +17,26 @@ read_cache_structure(char const* path)
   ifs.open(path);
 
   uint32_t line_size, n_ways, n_sets;
+  string replacement_method;
 
-  ifs >> line_size >> n_ways >> n_sets;
+  ifs >> line_size >> n_ways >> n_sets >> replacement_method;
 
   uint64_t block_mask = ~((static_cast<uint64_t>(1) << line_size) - 1);
 
-  return make_pair(install_cache(n_ways, line_size, n_sets, ReplaceModeLRU),
-                   block_mask);
+  ReplaceMode m;
+  if (replacement_method == "OPT")
+    m = ReplaceModeOPT;
+  else if (replacement_method == "LRU")
+    m = ReplaceModeLRU;
+  else
+    {
+      cerr << "Cache structure: unknown replacement method: "
+           << replacement_method << endl;
+      exit(1);
+    }
+
+  return make_tuple(install_cache(n_ways, line_size, n_sets, m),
+                    block_mask, m);
 }
 
 static vector<pair<uint64_t, uint32_t>>
@@ -49,15 +64,13 @@ int main(int argc, char *argv[])
     }
   Cache* c;
   uint64_t block_mask;
-  auto cb = read_cache_structure(argv[1]);
-  c = cb.first;
-  block_mask = cb.second;
+  ReplaceMode mode;
+  tie(c, block_mask, mode) = read_cache_structure(argv[1]);
 
   auto trace = read_trace(argv[2]);
+  vector<uint64_t> btrace;
 
-  cout << showbase << hex;
-
-  for (pair<uint64_t, uint32_t> addr_len : trace)
+  for (auto addr_len : trace)
     {
       uint64_t addr = addr_len.first;
       uint32_t len = addr_len.second;
@@ -65,20 +78,28 @@ int main(int argc, char *argv[])
       uint64_t last_block = (addr + len - 1) & block_mask;
 
       for (uint64_t a = first_block; a <= last_block; a++)
+        btrace.push_back(a);
+    }
+
+  cout << showbase << hex;
+
+  if (mode == ReplaceModeOPT)
+    set_opt_profile(c, &btrace[0], (&btrace[0]) + btrace.size());
+
+  for (uint64_t a : btrace)
+    {
+      Ret replacement;
+      int ret = cache_access(c, a, &replacement);
+      cout << a << " ";
+      if (ret == 0)
+        cout << "hit\n";
+      else
         {
-          Ret replacement;
-          int ret = cache_access(c, a, &replacement);
-          cout << a << " ";
-          if (ret == 0)
-            cout << "hit\n";
-          else
-            {
-              cout << "miss ";
-              cout << "(" << replacement.set_index
-                   << ", " << replacement.line_index << ")"
-                   << " (originally "
-                   << replacement.addr_old << ") replaced\n";
-            }
+          cout << "miss ";
+          cout << "(" << replacement.set_index
+               << ", " << replacement.line_index << ")"
+               << " (originally "
+               << replacement.addr_old << ") replaced\n";
         }
     }
 
