@@ -77,8 +77,8 @@ cache_access(struct Cache* cache, uint64_t addr, Ret* ret)
 	ret->addr_new = (addr >> cache->log2_blksize) << cache->log2_blksize;
 	ret->addr_old = ret->addr_new;
 
-	if (!(ret->type = cache->blk_hit_test(cache->unit, set,\
-		cache->n_ways, tag, &evict_blk) == RetTypeHit))
+	if ((ret->type = cache->blk_hit_test(cache->unit, set,\
+		cache->n_ways, tag, &evict_blk)) != RetTypeHit)
 	{
 		
 		ret->line_index = evict_blk - set;

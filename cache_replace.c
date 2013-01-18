@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "cache_replace.h"
 #include "cache.h"
@@ -47,7 +48,7 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 			if (!(*p & CL_P))
 			{
 				*evict_blk = p;
-				return -RetTypeCompulsoryMiss;
+				return RetTypeCompulsoryMiss;
 			}
 			if (*(unit->lru_unit->lu_t + (blk - set)) > \
 				*(unit->lru_unit->lu_t + (p - set)))
@@ -55,7 +56,7 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 		}
 		*evict_blk = blk;
 		*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;
-		return -RetTypeReplacedMiss;
+		return RetTypeReplacedMiss;
 	}
 	*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;
 	*evict_blk = blk;
@@ -69,6 +70,7 @@ opt_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
 {
 	OPT_unit *unit = (OPT_unit *)malloc(sizeof(OPT_unit));
 	unit->predict_f = (char *)malloc(n_ways * sizeof(char));
+	unit->log2_tag = 64 - (log2_blksize + log2_n_sets);
 	return unit;
 }
 
@@ -82,5 +84,52 @@ int
 opt_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** evict_blk)
 {
 
-	return 0;
+	blk_t *blk;
+
+	if (!(blk_hit(set, tag, n_ways, &blk) == 0))
+	{
+		blk_t *p;
+
+		for (p = set; p < set + n_ways; p++)
+		{
+			if (!(*p & CL_P))
+			{
+				*evict_blk = p;
+				return RetTypeCompulsoryMiss;
+			}
+		}
+		memset(unit->opt_unit->predict_f, 0, n_ways);
+		int count = n_ways;
+
+		for (uint64_t *cur = unit->opt_unit->profile; \
+			 cur < unit->opt_unit->profile_end; cur++)
+		{
+			if (count == 1) break;
+			uint64_t tag = (*cur >> (64 - unit->opt_unit->log2_tag)) | CL_P;
+			for (p = set; p < set + n_ways; p++)
+			{
+				if (*p == tag)
+				{
+					*(unit->opt_unit->predict_f + (p - set)) = 1;
+					count--;
+					break;
+				}
+			}
+		}
+
+		char *flag;
+		for (flag = unit->opt_unit->predict_f;\
+				flag < unit->opt_unit->predict_f + n_ways; flag++)
+		{
+			if (*flag == 0) break;
+		}
+
+		*evict_blk = set + (flag - unit->opt_unit->predict_f);
+
+		return RetTypeReplacedMiss;
+	}
+
+	*evict_blk = blk;
+
+	return RetTypeHit;
 }
