@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "cache.h"
 #include "cache_replace.h"
@@ -30,7 +31,8 @@ install_cache(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets, Repl
 	cache->log2_n_sets = log2_n_sets;
 	cache->unit = malloc(sizeof(Unit));
 
-	size_t cache_size = (1 << log2_n_sets) * (1 << n_ways) * sizeof(blk_t);
+	size_t cache_size = (1 << log2_n_sets) * n_ways * sizeof(blk_t);
+	// printf("%llx, %llx\n", 1 << log2_n_sets, n_ways);
 	cache->cache_buf = (blk_t *)malloc(cache_size);
 	memset((void *)cache->cache_buf, 0, cache_size);
 
@@ -67,7 +69,10 @@ cache_access(struct Cache* cache, uint64_t addr, Ret* ret)
 
 	tag = addr >> log2_index;
 	set_index = (addr << log2_tag) >> (log2_tag + cache->log2_blksize);
+	// printf("0x%llx, 0x%llx\n", cache->log2_blksize, cache->log2_n_sets);
 	set = cache->cache_buf + set_index * cache->n_ways * sizeof(blk_t);
+
+	// printf("access :0x%llx, 0x%llx, 0x%llx\n", addr, tag, set_index);
 
 	if (!(cache->blk_hit_test(cache->unit, set, cache->n_ways, tag, &evict_blk) == 0))
 	{
@@ -77,6 +82,7 @@ cache_access(struct Cache* cache, uint64_t addr, Ret* ret)
 		ret->addr_old = (*evict_blk & (~CL_P)) << log2_index | \
 						(set_index << cache->log2_blksize);
 		*evict_blk = (ret->addr_new >> log2_index) | CL_P;
+		// printf("0x%llx, 0x%llx\n", ret->addr_new, *evict_blk);
 		return -1;
 	}
 
