@@ -25,7 +25,10 @@ install_cache(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets, Repl
 	struct Cache* cache;
 
 	cache = malloc(sizeof(Cache));
-	memmove((void *)cache, (void *)&n_ways, 3 * sizeof(uint32_t));
+	cache->n_ways = n_ways;
+	cache->log2_blksize = log2_blksize;
+	cache->log2_n_sets = log2_n_sets;
+	cache->unit = malloc(sizeof(Unit));
 
 	size_t cache_size = (1 << log2_n_sets) * (1 << n_ways) * sizeof(uint64_t);
 	cache->cache_buf = (blk_t *)malloc(cache_size);
