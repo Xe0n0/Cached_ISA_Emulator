@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 #include "cache_replace.h"
 #include "cache.h"
 
@@ -39,7 +39,7 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 	unit->lru_unit->cur_t ++;
 	blk_t *blk;
 
-	if (!(blk_hit(set, tag, n_ways, &blk) == 0))
+	if (!(blk_hit(set, tag, n_ways, &blk) == RetTypeHit))
 	{
 		blk_t *p;
 
@@ -87,7 +87,7 @@ opt_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 	blk_t *blk;
 	unit->opt_unit->profile ++;
 
-	if (!(blk_hit(set, tag, n_ways, &blk) == 0))
+	if (!(blk_hit(set, tag, n_ways, &blk) == RetTypeHit))
 	{
 		blk_t *p;
 
@@ -99,7 +99,7 @@ opt_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 				return RetTypeCompulsoryMiss;
 			}
 		}
-		memset(unit->opt_unit->predict_f, 0, n_ways);
+		memset(unit->opt_unit->predict_f, 0, n_ways * sizeof(char));
 		int count = n_ways;
 
 		uint64_t* c;
@@ -117,12 +117,18 @@ opt_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 				}
 			}
 		}
+		// printf("c:: %d\n", count);
 
+		char *f;
 		char *flag;
-		for (flag = unit->opt_unit->predict_f;\
-				flag < unit->opt_unit->predict_f + n_ways; flag++)
+		for (flag = f = unit->opt_unit->predict_f;\
+				f < unit->opt_unit->predict_f + n_ways; f++)
 		{
-			if (*flag == 0) break;
+			if (*f == 0)
+			{
+				flag = f;
+				*(set + (f - unit->opt_unit->predict_f)) &= (~CL_P);
+			}
 		}
 
 		*evict_blk = set + (flag - unit->opt_unit->predict_f);
