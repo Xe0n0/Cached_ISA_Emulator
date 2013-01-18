@@ -18,6 +18,6 @@ cache_replace.o: cache_replace.c cache_replace.h cache.h
 validate: validate.cc
 
 clean:
-	rm -f csim *.o
+	rm -f csim validate *.o
 
 .PHONY: clean
