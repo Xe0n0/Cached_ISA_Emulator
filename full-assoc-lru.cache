@@ -1,0 +1,7 @@
+5 1024 0 LRU
+
+Cache line: 32B
+1024-ways associative
+1 set (full associative)
+
+32KB in total

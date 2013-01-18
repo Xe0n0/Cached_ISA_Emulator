@@ -1,0 +1,7 @@
+5 8 7 LRU
+
+Cache line size: 32B
+8-ways associative
+128 sets
+
+32KB in total

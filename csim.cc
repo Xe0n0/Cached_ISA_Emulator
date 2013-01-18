@@ -10,7 +10,7 @@
 using namespace std;
 
 static tuple<Cache*, uint64_t, ReplaceMode>
-read_cache_structure(char const* path)
+read_cache_description(char const* path)
 {
   ifstream ifs;
   ifs.exceptions(ifstream::failbit | ifstream::badbit);
@@ -30,7 +30,7 @@ read_cache_structure(char const* path)
     m = ReplaceModeLRU;
   else
     {
-      cerr << "Cache structure: unknown replacement method: "
+      cerr << "Cache description: unknown replacement method: "
            << replacement_method << endl;
       exit(1);
     }
@@ -59,13 +59,13 @@ int main(int argc, char *argv[])
 {
   if (argc != 3)
     {
-      cerr << "Usage: " << argv[0] << " cache-structure trace" << endl;
+      cerr << "Usage: " << argv[0] << " cache-description trace" << endl;
       return 1;
     }
   Cache* c;
   uint64_t block_mask;
   ReplaceMode mode;
-  tie(c, block_mask, mode) = read_cache_structure(argv[1]);
+  tie(c, block_mask, mode) = read_cache_description(argv[1]);
 
   auto trace = read_trace(argv[2]);
   vector<uint64_t> btrace;
