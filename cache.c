@@ -30,9 +30,9 @@ install_cache(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets, Repl
 	cache->log2_n_sets = log2_n_sets;
 	cache->unit = malloc(sizeof(Unit));
 
-	size_t cache_size = (1 << log2_n_sets) * (1 << n_ways) * sizeof(uint64_t);
+	size_t cache_size = (1 << log2_n_sets) * (1 << n_ways) * sizeof(blk_t);
 	cache->cache_buf = (blk_t *)malloc(cache_size);
-	memset((void *)cache->cache_buf, 0, sizeof(cache_size));
+	memset((void *)cache->cache_buf, 0, cache_size);
 
 	//choose handler and corresponding unit for cache
 	switch(mode){
@@ -66,7 +66,7 @@ cache_access(struct Cache* cache, uint64_t addr, Ret* ret)
 	log2_tag = 64 - log2_index;
 
 	tag = addr >> log2_index;
-	set_index = (addr << log2_tag) >> log2_index;
+	set_index = (addr << log2_tag) >> (log2_tag + cache->log2_blksize);
 	set = cache->cache_buf + set_index * cache->n_ways * sizeof(blk_t);
 
 	if (!(cache->blk_hit_test(cache->unit, set, cache->n_ways, tag, &evict_blk) == 0))

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "cache_replace.h"
 #include "cache.h"
@@ -20,7 +21,8 @@ blk_hit(blk_t* set, uint64_t tag, uint32_t n_ways, blk_t** blk)
 	size_t i;
 	blk_t* cur = set;
 
-	for (i = 0; i < n_ways; i++){
+	for (i = 0; i < n_ways; i++)
+	{
 		if (*cur == (tag | CL_P)) // tag | CL_P ensure a valid block
 		{
 			*blk = cur;
