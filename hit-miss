@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+from __future__ import division
+from __future__ import print_function
+
+import re
+import sys
+
+interval = -1
+
+try:
+    interval = int(sys.argv[1])
+except:
+    pass
+
+total = 0
+miss = 0
+i = 0
+
+for l in sys.stdin:
+    if re.match('.*hit.*', l):
+        pass
+    elif re.match('.*miss.*', l):
+        miss = miss + 1
+    else:
+        print('Unexpected input:', l, file=sys.stderr, end='')
+        continue
+    total = total + 1
+    if total == interval:
+        print('%d %g' % (i, miss / total))
+        total = miss = 0
+        i = i + interval
+
+if 0 < total and interval == -1:
+    print('Total: %d, Hit: %d, Miss: %d, Hit Rate: %g%%, Miss Rate: %g%%' %
+          (total, total - miss, miss,
+           100 * (total - miss) / total, 100 * miss / total))
+elif 0 < total and total != interval:
+    print('%d %g' % (i, miss / total))
