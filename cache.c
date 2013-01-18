@@ -1,11 +1,12 @@
 #include <stdlib.h>
-#include <memory.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "cache.h"
 #include "cache_replace.h"
 
 // tag field is considered to be no more than 63 bit
-#define CL_P (0x1 << 63)
+#define CL_P ((uint64_t) 1 << 63)
 
 // typedef uint64_t blk_t;
 
@@ -34,11 +35,11 @@ install_cache(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets, Repl
 	switch(mode){
 		case ReplaceModeLRU:
 			cache->blk_hit_test = lru_blk_hit_test;
-			cache->unit->lru_unit = lru_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets);
+			cache->unit->lru_unit = lru_get_unit(n_ways, log2_blksize, log2_n_sets);
 			break;
 		case ReplaceModeOPT:
 			cache->blk_hit_test = opt_blk_hit_test;
-			cache->unit->opt_unit = opt_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets);
+			cache->unit->opt_unit = opt_get_unit(n_ways, log2_blksize, log2_n_sets);
 			break;
 		default:
 			break;

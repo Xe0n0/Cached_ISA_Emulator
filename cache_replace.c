@@ -3,7 +3,7 @@
 #include "cache_replace.h"
 #include "cache.h"
 
-#define CL_P (0x1 << 63)
+#define CL_P ((uint64_t) 1 << 63)
 
 LRU_unit*
 lru_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
@@ -11,6 +11,7 @@ lru_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
 	LRU_unit *unit = (LRU_unit *)malloc(sizeof(LRU_unit));
 	unit->lu_t = (uint64_t*)malloc(n_ways * sizeof(uint64_t));
 	unit->cur_t = 0;
+        return unit;
 }
 
 int
@@ -42,7 +43,7 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 
 		for (blk = p = set; p < set + n_ways; p++)
 		{
-			if (!(p & CL_P))
+			if (!(*p & CL_P))
 			{
 				*evict_blk = p;
 				return 0;
