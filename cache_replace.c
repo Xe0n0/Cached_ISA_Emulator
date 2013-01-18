@@ -78,7 +78,6 @@ void
 opt_init_unit(OPT_unit* unit, uint64_t* profile, uint64_t* profile_end){
 	unit->profile = profile;
 	unit->profile_end = profile_end;
-	unit->cur = profile;
 }
 
 int
@@ -86,7 +85,7 @@ opt_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 {
 
 	blk_t *blk;
-	unit->opt_unit->cur ++;
+	unit->opt_unit->profile ++;
 
 	if (!(blk_hit(set, tag, n_ways, &blk) == 0))
 	{
@@ -103,11 +102,11 @@ opt_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 		memset(unit->opt_unit->predict_f, 0, n_ways);
 		int count = n_ways;
 
-		uint64_t* cur;
-		for (cur = unit->opt_unit->cur;cur < unit->opt_unit->profile_end; cur++)
+		uint64_t* c;
+		for (c = unit->opt_unit->profile;c <= unit->opt_unit->profile_end; c++)
 		{
 			if (count == 1) break;
-			uint64_t tag = (*cur >> (64 - unit->opt_unit->log2_tag)) | CL_P;
+			uint64_t tag = (*c >> (64 - unit->opt_unit->log2_tag)) | CL_P;
 			for (p = set; p < set + n_ways; p++)
 			{
 				if (*p == tag)

@@ -13,7 +13,6 @@ typedef struct{
 typedef struct{
 	uint64_t *profile;
 	uint64_t *profile_end;
-	uint64_t *cur;
 	char *predict_f;
 	uint32_t log2_tag;
 }OPT_unit;
