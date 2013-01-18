@@ -8,12 +8,20 @@ extern "C" {
 
 struct Cache;
 
+typedef enum
+{
+	RetTypeHit = 0,
+	RetTypeCompulsoryMiss = 1,
+	RetTypeReplacedMiss = 2
+}RetType;
+
 typedef struct
 {
 	uint32_t set_index;
 	uint32_t line_index;
 	uint64_t addr_old;
 	uint64_t addr_new;
+	RetType type;
 }Ret;
 
 typedef enum

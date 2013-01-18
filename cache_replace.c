@@ -25,7 +25,7 @@ blk_hit(blk_t* set, uint64_t tag, uint32_t n_ways, blk_t** blk)
 		if (*cur == (tag | CL_P)) // tag | CL_P ensure a valid block
 		{
 			*blk = cur;
-			return 0;
+			return RetTypeHit;
 		}
 		cur += 1;
 	}
@@ -47,7 +47,7 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 			if (!(*p & CL_P))
 			{
 				*evict_blk = p;
-				return -1;
+				return -RetTypeCompulsoryMiss;
 			}
 			if (*(unit->lru_unit->lu_t + (blk - set)) > \
 				*(unit->lru_unit->lu_t + (p - set)))
@@ -55,11 +55,12 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 		}
 		*evict_blk = blk;
 		*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;
-		return -1;
+		return -RetTypeReplacedMiss;
 	}
 	*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;
+	*evict_blk = blk;
 
-	return 0;
+	return RetTypeHit;
 
 }
 

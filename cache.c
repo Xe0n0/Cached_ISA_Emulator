@@ -73,18 +73,22 @@ cache_access(struct Cache* cache, uint64_t addr, Ret* ret)
 	set = cache->cache_buf + set_index * cache->n_ways;
 
 	// printf("access :0x%llx, 0x%llx, 0x%llx\n", addr, tag, set_index);
+	ret->set_index = set_index;
+	ret->addr_new = (addr >> cache->log2_blksize) << cache->log2_blksize;
+	ret->addr_old = ret->addr_new;
 
-	if (!(cache->blk_hit_test(cache->unit, set, cache->n_ways, tag, &evict_blk) == 0))
+	if (!(ret->type = cache->blk_hit_test(cache->unit, set,\
+		cache->n_ways, tag, &evict_blk) == RetTypeHit))
 	{
-		ret->set_index = set_index;
+		
 		ret->line_index = evict_blk - set;
-		ret->addr_new = (addr >> cache->log2_blksize) << cache->log2_blksize;
 		ret->addr_old = (*evict_blk & (~CL_P)) << log2_index | \
 						(set_index << cache->log2_blksize);
 		*evict_blk = (ret->addr_new >> log2_index) | CL_P;
 		// printf("0x%llx, 0x%llx\n", ret->addr_new, *evict_blk);
 		return -1;
 	}
+	ret->line_index = evict_blk - set;
 
 	return 0;
 }
