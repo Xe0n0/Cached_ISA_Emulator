@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "cache_replace.h"
 #include "cache.h"
@@ -48,7 +47,7 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 			if (!(*p & CL_P))
 			{
 				*evict_blk = p;
-				return 0;
+				return -1;
 			}
 			if (*(unit->lru_unit->lu_t + (blk - set)) > \
 				*(unit->lru_unit->lu_t + (p - set)))
@@ -56,7 +55,6 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 		}
 		*evict_blk = blk;
 		*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;
-
 		return -1;
 	}
 	*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;

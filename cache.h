@@ -12,8 +12,8 @@ typedef struct
 {
 	uint32_t set_index;
 	uint32_t line_index;
-	uint32_t addr_old;
-	uint32_t addr_new;
+	uint64_t addr_old;
+	uint64_t addr_new;
 }Ret;
 
 typedef enum
