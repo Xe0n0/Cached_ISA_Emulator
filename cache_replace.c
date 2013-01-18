@@ -11,33 +11,51 @@ lru_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
 	unit->cur_t = 0;
 }
 
-int blk_hit(blk* set, uint64_t tag, uint32_t n_ways, blk** blk)
+int blk_hit(blk_t* set, uint64_t tag, uint32_t n_ways, blk_t** blk)
 {
 	size_t i;
-	uint64_t* cur = set;
+	blk_t* cur = set;
 
 	for (i = 0; i < n_ways; i++){
-		if (*set == (tag | CL_P)) // tag | CL_P ensure a valid block
-		cur += sizeof(blk);
+		if (*cur == (tag | CL_P)) // tag | CL_P ensure a valid block
+		{
+			*blk = cur;
+			return 0;
+		}
+		cur += 1;
 	}
 	return -1;
 }
 
 int
-lru_blk_hit_test(LRU_unit* unit, blk* set, uint64_t tag, blk** evict_blk)
+lru_blk_hit_test(LRU_unit* unit, blk_t* set, uint64_t tag, blk_t** evict_blk)
 {
-	unit->opt_unit->cur_t ++;
-	blk **blk;
+	unit->lru_unit->cur_t ++;
+	blk_t *blk;
 
 	if (!(blk_hit(set, tag, n_ways, blk) == 0))
 	{
-		blk *p;
+		blk_t *p;
 
-		for (p = set; p < set + n_ways; p++)
+		for (blk = p = set; p < set + n_ways; p++)
 		{
 			if (!(p & CL_P))
+			{
+				*evict_blk = p;
+				return 0;
+			}
+			if (*(unit->lru_unit->lu_t + (blk - set)) > \
+				*(unit->lru_unit->lu_t + (p - set)))
+				blk = p;
 		}
+		*evict_blk = blk;
+		*(unit->lru_unit->lu_t + (evict_blk - set)) = unit->lru_unit->cur_t;
+
+		return -1;
 	}
+	*(unit->lru_unit->lu_t + (blk - set)) = unit->lru_unit->cur_t;
+
+	return 0;
 
 }
 
@@ -53,4 +71,10 @@ void
 opt_init_unit(OPT_unit* unit, uint64_t* profile, uint64_t* profile_end){
 	unit->profile = profile;
 	unit->profile_end = profile_end;	
+}
+
+int
+opt_blk_hit_test(blk_t* set, uint64_t tag, blk_t** evict_blk)
+{
+	return 0;
 }
