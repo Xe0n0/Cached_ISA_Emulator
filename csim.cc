@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
       for (uint64_t a = first_block; a <= last_block; a++)
         {
           Ret replacement;
-          int ret = access(c, a, &replacement);
+          int ret = cache_access(c, a, &replacement);
           if (ret == 0)
             cout << "hit\n";
           else

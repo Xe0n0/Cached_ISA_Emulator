@@ -1,8 +1,6 @@
 #include "cache_replace.h"
 #include "cache.h"
 
-
-
 LRU_unit*
 lru_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
 {
@@ -11,7 +9,8 @@ lru_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
 	unit->cur_t = 0;
 }
 
-int blk_hit(blk_t* set, uint64_t tag, uint32_t n_ways, blk_t** blk)
+int
+blk_hit(blk_t* set, uint64_t tag, uint32_t n_ways, blk_t** blk)
 {
 	size_t i;
 	blk_t* cur = set;
@@ -70,11 +69,12 @@ opt_get_unit(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets)
 void
 opt_init_unit(OPT_unit* unit, uint64_t* profile, uint64_t* profile_end){
 	unit->profile = profile;
-	unit->profile_end = profile_end;	
+	unit->profile_end = profile_end;
 }
 
 int
 opt_blk_hit_test(blk_t* set, uint64_t tag, blk_t** evict_blk)
 {
+
 	return 0;
 }

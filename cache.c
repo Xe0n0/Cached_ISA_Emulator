@@ -50,7 +50,7 @@ install_cache(uint32_t n_ways, uint32_t log2_blksize, uint32_t log2_n_sets, Repl
 }
 
 int 
-access(struct Cache* cache, uint64_t addr, struct Ret* ret)
+cache_access(struct Cache* cache, uint64_t addr, struct Ret* ret)
 {
 	uint64_t tag;
 	uint64_t set_index;
