@@ -17,29 +17,25 @@ class cache
   };
 
   uint log2_n_sets;
-  uint n_sets;
   uint n_ways;
   uint log2_line_size;
-  uint line_size;
   vector<vector<line>> sets;
 
 public:
   cache(uint l2_ls, uint n_ways, uint l2_sets)
     : log2_n_sets(l2_sets),
-      n_sets(1 << l2_sets),
       n_ways(n_ways),
-      log2_line_size(l2_ls),
-      line_size(1 << l2_ls)
+      log2_line_size(l2_ls)
   {
+    uint n_sets = 1 << l2_sets;
     sets.reserve(n_sets);
-    uint i = n_sets;
-    while (i--)
-      sets.push_back(vector<line>(line_size));
+    while (n_sets--)
+      sets.push_back(vector<line>(n_ways));
   }
 
   uint addr2set(uint64_t addr)
   {
-    return (addr >> log2_line_size) & (n_sets - 1);
+    return (addr >> log2_line_size) & ((1 << log2_n_sets) - 1);
   }
 
   uint64_t addr2tag(uint64_t addr)
@@ -51,7 +47,7 @@ public:
   {
     if (addr2set(addr) != set)
       return false;
-    if (line >= line_size)
+    if (line >= n_ways)
       return false;
     auto l = sets[set][line];
     if (!l.valid)
@@ -65,7 +61,7 @@ public:
   {
     if (addr2set(addr) != set)
       return false;
-    if (line >= line_size)
+    if (line >= n_ways)
       return false;
     for (auto l : sets[set])
       if (l.valid && l.tag == addr2tag(addr))

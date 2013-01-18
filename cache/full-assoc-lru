@@ -1,4 +1,4 @@
-5 1024 0 OPT
+5 1024 0 LRU
 
 Cache line: 32B
 1024-ways associative
