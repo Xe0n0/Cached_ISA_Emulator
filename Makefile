@@ -1,8 +1,8 @@
 CC=clang
 CXX=clang++
 CPPFLAGS=-I.
-CFLAGS=-g -Wall -std=c11
-CXXFLAGS=-g -Wall -std=c++11 -stdlib=libc++
+CFLAGS=-g -Wall -std=c11 -O2
+CXXFLAGS=-g -Wall -std=c++11 -stdlib=libc++ -O2
 
 all: csim validate
 
