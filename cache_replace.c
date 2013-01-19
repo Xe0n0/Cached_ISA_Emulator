@@ -48,6 +48,8 @@ lru_blk_hit_test(Unit* unit, blk_t* set, uint64_t n_ways, uint64_t tag, blk_t** 
 			if (!(*p & CL_P))
 			{
 				*evict_blk = p;
+				*(unit->lru_unit->lu_t + (*evict_blk - set)) = \
+					unit->lru_unit->cur_t;
 				return RetTypeCompulsoryMiss;
 			}
 			if (*(unit->lru_unit->lu_t + (blk - set)) > \
